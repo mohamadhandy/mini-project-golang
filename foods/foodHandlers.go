@@ -48,6 +48,24 @@ func (h *foodHandler) GetSingleFood(c *gin.Context) {
 	}
 }
 
+func (h *foodHandler) DeleteFood(c *gin.Context) {
+	foodid := c.Param("foodid")
+	fmt.Println("foodid", foodid)
+	foodId, _ := strconv.Atoi(foodid)
+	_, err := h.foodService.DeleteFood(foodId)
+	if err != nil {
+		errMessage := fmt.Sprintf("Delete food with id %v error!", foodid)
+		res := helper.APIResponse(errMessage, http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	} else {
+		successMsg := fmt.Sprintf("Success delete food with id %v", foodId)
+		response := helper.APIResponse(successMsg, http.StatusOK, "success", nil)
+
+		c.JSON(http.StatusOK, response)
+	}
+}
+
 func (h *foodHandler) CreateFood(c *gin.Context) {
 	var input CreateFoodInput
 	err := c.ShouldBindJSON(&input)

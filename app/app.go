@@ -50,6 +50,7 @@ func Start() {
 	api := router.Group("/api/v1")
 	api.GET("/foods", foodHandler.GetAllFood)
 	api.GET("/foods/:foodid", foodHandler.GetSingleFood)
+	api.DELETE("/foods/:foodid", foodHandler.DeleteFood)
 	api.POST("/foods", foodHandler.CreateFood)
 
 	routerRun := fmt.Sprintf(":%s", serverPort)

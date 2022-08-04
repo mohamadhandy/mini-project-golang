@@ -9,6 +9,7 @@ type FoodService interface {
 	GetAllFood() ([]Food, error)
 	GetFoodByID(int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
+	DeleteFood(int) (Food, error)
 }
 
 type serviceFood struct {
@@ -39,7 +40,7 @@ func (s *serviceFood) GetFoodByID(id int) (Food, error) {
 	}
 	if food.ID == 0 {
 		fmt.Println("no food found!")
-		return food, errors.New("no food found on that email")
+		return food, errors.New("no food found")
 	}
 	return food, nil
 }
@@ -55,4 +56,13 @@ func (s *serviceFood) CreateFood(input CreateFoodInput) (Food, error) {
 		return newFood, err
 	}
 	return newFood, nil
+}
+
+func (s *serviceFood) DeleteFood(id int) (Food, error) {
+	food, err := s.foodRepository.DeleteFood(id)
+	if err != nil {
+		fmt.Println("Error service?")
+		return food, err
+	}
+	return food, nil
 }
