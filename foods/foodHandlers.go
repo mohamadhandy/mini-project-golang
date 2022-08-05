@@ -32,7 +32,6 @@ func (h *foodHandler) GetAllFood(c *gin.Context) {
 
 func (h *foodHandler) GetSingleFood(c *gin.Context) {
 	foodid := c.Param("foodid")
-	fmt.Println("foodid", foodid)
 	foodId, _ := strconv.Atoi(foodid)
 	foods, err := h.foodService.GetFoodByID(foodId)
 	if err != nil {
@@ -50,7 +49,6 @@ func (h *foodHandler) GetSingleFood(c *gin.Context) {
 
 func (h *foodHandler) DeleteFood(c *gin.Context) {
 	foodid := c.Param("foodid")
-	fmt.Println("foodid", foodid)
 	foodId, _ := strconv.Atoi(foodid)
 	_, err := h.foodService.DeleteFood(foodId)
 	if err != nil {
@@ -88,7 +86,6 @@ func (h *foodHandler) CreateFood(c *gin.Context) {
 
 func (h *foodHandler) UpdateFood(c *gin.Context) {
 	foodid := c.Param("foodid")
-	fmt.Println("foodid", foodid)
 	foodId, _ := strconv.Atoi(foodid)
 	var input CreateFoodInput
 	err := c.ShouldBindJSON(&input)

@@ -1,7 +1,7 @@
 package foods
 
 import (
-	"fmt"
+	"miniprojectgo/logger"
 
 	"gorm.io/gorm"
 )
@@ -26,7 +26,7 @@ func (f *foodRepositoryDB) FindAll() ([]Food, error) {
 	var foods []Food
 	err := f.db.Find(&foods).Error
 	if err != nil {
-		fmt.Println("err")
+		logger.Error("Error: " + err.Error())
 		return foods, err
 	}
 	return foods, nil
@@ -37,10 +37,9 @@ func (f *foodRepositoryDB) FindById(id int) (Food, error) {
 	var food Food
 	err := f.db.Where("food_id = ?", id).Find(&food).Error
 	if err != nil {
-		fmt.Println("Error db??")
+		logger.Error("Unexpected Error: " + err.Error())
 		return food, err
 	} else {
-		fmt.Println("Single food", food)
 		return food, nil
 	}
 }
@@ -48,7 +47,7 @@ func (f *foodRepositoryDB) FindById(id int) (Food, error) {
 func (f *foodRepositoryDB) CreateFood(food Food) (Food, error) {
 	var err error
 	if err = f.db.Create(&food).Error; err != nil {
-		fmt.Println("ERror??")
+		logger.Error("Unexpected Error: " + err.Error())
 		return food, nil
 	}
 	return food, nil
@@ -58,7 +57,7 @@ func (f *foodRepositoryDB) DeleteFood(id int) (Food, error) {
 	var err error
 	var food Food
 	if err = f.db.Where("food_id = ?", id).Delete(&food).Error; err != nil {
-		fmt.Println("ERror??")
+		logger.Error("Unexpected Error: " + err.Error())
 		return food, nil
 	}
 	return food, nil
