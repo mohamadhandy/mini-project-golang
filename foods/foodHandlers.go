@@ -90,7 +90,7 @@ func (h *foodHandler) UpdateFood(c *gin.Context) {
 	var input CreateFoodInput
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
-		res := helper.APIResponse("ERROR??", http.StatusBadRequest, "error", err)
+		res := helper.APIResponse("ERROR", http.StatusBadRequest, "error", err)
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -101,6 +101,7 @@ func (h *foodHandler) UpdateFood(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	} else {
+		updatedFood.ID = foodId
 		successMsg := fmt.Sprintf("Success update food with id %v", foodId)
 		response := helper.APIResponse(successMsg, http.StatusOK, "success", updatedFood)
 

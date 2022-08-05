@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"miniprojectgo/foods"
 	"miniprojectgo/logger"
+	"miniprojectgo/members"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -37,12 +38,14 @@ func Start() {
 
 	// initialize repo
 	foodRepository := foods.NewFoodRepositoryDB(db)
+	memberRepository := members.NewMemberRepository(db)
 
 	// initialize service
 	foodService := foods.NewServiceFood(foodRepository)
-
+	memberService := members.NewServiceMember(memberRepository)
 	// initialize handler
 	foodHandler := foods.NewFoodHandler(foodService)
+	memberHandler := members.NewUserHandler(*memberService)
 
 	// initialize router gin
 	router := gin.Default()
@@ -53,6 +56,7 @@ func Start() {
 	api.DELETE("/foods/:foodid", foodHandler.DeleteFood)
 	api.PUT("/foods/:foodid", foodHandler.UpdateFood)
 	api.POST("/foods", foodHandler.CreateFood)
+	api.POST("/members", memberHandler.RegisterMember)
 
 	routerRun := fmt.Sprintf(":%s", serverPort)
 	router.Run(routerRun)

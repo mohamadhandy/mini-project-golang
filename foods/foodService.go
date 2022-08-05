@@ -2,7 +2,6 @@ package foods
 
 import (
 	"errors"
-	"fmt"
 )
 
 type FoodService interface {
@@ -23,12 +22,9 @@ func NewServiceFood(foodRepository RepositoryFoodDB) *serviceFood {
 
 func (s *serviceFood) GetAllFood() ([]Food, error) {
 	foods, err := s.foodRepository.FindAll()
-	fmt.Println("err", err)
 	if err != nil {
-		fmt.Println("Error?!", err.Error())
 		return foods, err
 	} else {
-		fmt.Println("foods!", foods)
 		return foods, nil
 	}
 }
@@ -36,11 +32,9 @@ func (s *serviceFood) GetAllFood() ([]Food, error) {
 func (s *serviceFood) GetFoodByID(id int) (Food, error) {
 	food, err := s.foodRepository.FindById(id)
 	if err != nil {
-		fmt.Println("Error service?")
 		return food, err
 	}
 	if food.ID == 0 {
-		fmt.Println("no food found!")
 		return food, errors.New("no food found")
 	}
 	return food, nil
@@ -62,7 +56,6 @@ func (s *serviceFood) CreateFood(input CreateFoodInput) (Food, error) {
 func (s *serviceFood) DeleteFood(id int) (Food, error) {
 	food, err := s.foodRepository.DeleteFood(id)
 	if err != nil {
-		fmt.Println("Error service?")
 		return food, err
 	}
 	return food, nil
