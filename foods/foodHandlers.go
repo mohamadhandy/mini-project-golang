@@ -75,13 +75,38 @@ func (h *foodHandler) CreateFood(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	newUser, err := h.foodService.CreateFood(input)
+	newFood, err := h.foodService.CreateFood(input)
 	if err != nil {
 		res := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	response := helper.APIResponse("Your Food has been created", http.StatusOK, "success", newUser)
+	response := helper.APIResponse("Your Food has been created", http.StatusOK, "success", newFood)
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *foodHandler) UpdateFood(c *gin.Context) {
+	foodid := c.Param("foodid")
+	fmt.Println("foodid", foodid)
+	foodId, _ := strconv.Atoi(foodid)
+	var input CreateFoodInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		res := helper.APIResponse("ERROR??", http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	updatedFood, err := h.foodService.UpdateFood(input, foodId)
+	if err != nil {
+		errMessage := fmt.Sprintf("Update food with id %v error!", foodid)
+		res := helper.APIResponse(errMessage, http.StatusBadRequest, "error", err)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	} else {
+		successMsg := fmt.Sprintf("Success update food with id %v", foodId)
+		response := helper.APIResponse(successMsg, http.StatusOK, "success", updatedFood)
+
+		c.JSON(http.StatusOK, response)
+	}
 }

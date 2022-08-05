@@ -10,6 +10,7 @@ type FoodService interface {
 	GetFoodByID(int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
 	DeleteFood(int) (Food, error)
+	UpdateFood(CreateFoodInput, int) (Food, error)
 }
 
 type serviceFood struct {
@@ -65,4 +66,17 @@ func (s *serviceFood) DeleteFood(id int) (Food, error) {
 		return food, err
 	}
 	return food, nil
+}
+
+func (s *serviceFood) UpdateFood(input CreateFoodInput, id int) (Food, error) {
+	food := Food{}
+	food.Name = input.Name
+	food.Price = input.Price
+	food.Status = input.Status
+	food.Stock = input.Stock
+	updatedFood, err := s.foodRepository.UpdateFood(food, id)
+	if err != nil {
+		return updatedFood, err
+	}
+	return updatedFood, nil
 }

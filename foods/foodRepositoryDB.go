@@ -11,6 +11,7 @@ type RepositoryFoodDB interface {
 	FindById(int) (Food, error)
 	CreateFood(Food) (Food, error)
 	DeleteFood(int) (Food, error)
+	UpdateFood(Food, int) (Food, error)
 }
 
 type foodRepositoryDB struct {
@@ -59,6 +60,14 @@ func (f *foodRepositoryDB) DeleteFood(id int) (Food, error) {
 	if err = f.db.Where("food_id = ?", id).Delete(&food).Error; err != nil {
 		fmt.Println("ERror??")
 		return food, nil
+	}
+	return food, nil
+}
+
+func (f *foodRepositoryDB) UpdateFood(food Food, id int) (Food, error) {
+	var err error
+	if err = f.db.Model(&food).Where("food_id = ?", id).Updates(food).Error; err != nil {
+		return food, err
 	}
 	return food, nil
 }
