@@ -45,7 +45,7 @@ func Start() {
 	memberService := members.NewServiceMember(memberRepository)
 	// initialize handler
 	foodHandler := foods.NewFoodHandler(foodService)
-	memberHandler := members.NewUserHandler(*memberService)
+	memberHandler := members.NewUserHandler(memberService)
 
 	// initialize router gin
 	router := gin.Default()

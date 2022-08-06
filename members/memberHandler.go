@@ -8,11 +8,11 @@ import (
 )
 
 type memberHandler struct {
-	userService serviceMember
+	memberService MemberService
 }
 
-func NewUserHandler(userService serviceMember) *memberHandler {
-	return &memberHandler{userService}
+func NewUserHandler(memberService MemberService) *memberHandler {
+	return &memberHandler{memberService}
 }
 
 func (h *memberHandler) RegisterMember(c *gin.Context) {
@@ -24,7 +24,7 @@ func (h *memberHandler) RegisterMember(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	newUser, err := h.userService.RegisterMember(input)
+	newUser, err := h.memberService.RegisterMember(input)
 	if err != nil {
 		res := helper.APIResponse("Register user failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
