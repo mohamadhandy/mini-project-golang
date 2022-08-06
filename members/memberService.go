@@ -9,6 +9,7 @@ import (
 type MemberService interface {
 	RegisterMember(MemberRegisterInput) (Member, error)
 	Login(LoginInput) (Member, error)
+	GetMemberByID(int) (Member, error)
 }
 
 type serviceMember struct {
@@ -50,6 +51,17 @@ func (s *serviceMember) Login(input LoginInput) (Member, error) {
 	err = bcrypt.CompareHashAndPassword([]byte(member.Password), []byte(password))
 	if err != nil {
 		return member, err
+	}
+	return member, nil
+}
+
+func (s *serviceMember) GetMemberByID(id int) (Member, error) {
+	member, err := s.memberRepositoryDB.FindById(id)
+	if err != nil {
+		return member, err
+	}
+	if member.Email == "" {
+		return member, errors.New("no member found on that email")
 	}
 	return member, nil
 }

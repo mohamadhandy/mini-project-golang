@@ -2,12 +2,17 @@ package app
 
 import (
 	"fmt"
+	"miniprojectgo/auth"
 	"miniprojectgo/foods"
+	"miniprojectgo/helper"
 	"miniprojectgo/logger"
 	"miniprojectgo/members"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -43,9 +48,13 @@ func Start() {
 	// initialize service
 	foodService := foods.NewServiceFood(foodRepository)
 	memberService := members.NewServiceMember(memberRepository)
+
+	// initialize auth service
+	authService := auth.NewService()
+
 	// initialize handler
 	foodHandler := foods.NewFoodHandler(foodService)
-	memberHandler := members.NewUserHandler(memberService)
+	memberHandler := members.NewMemberHandler(memberService, authService)
 
 	// initialize router gin
 	router := gin.Default()
@@ -61,4 +70,41 @@ func Start() {
 
 	routerRun := fmt.Sprintf(":%s", serverPort)
 	router.Run(routerRun)
+}
+
+func authMiddleware(authService auth.Service, memberService members.MemberService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+		if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+		// Bearer token
+		tokenString := ""
+		arrayToken := strings.Split(authHeader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
+		token, err := authService.ValidateToken(tokenString)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+		claim, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+		memberId := int(claim["member_id"].(float64))
+		member, err := memberService.GetMemberByID(memberId)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+		c.Set("currentMember", member)
+	}
 }

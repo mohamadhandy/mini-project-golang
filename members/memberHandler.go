@@ -1,6 +1,7 @@
 package members
 
 import (
+	"miniprojectgo/auth"
 	"miniprojectgo/helper"
 	"net/http"
 
@@ -9,10 +10,11 @@ import (
 
 type memberHandler struct {
 	memberService MemberService
+	authService   auth.Service
 }
 
-func NewUserHandler(memberService MemberService) *memberHandler {
-	return &memberHandler{memberService}
+func NewMemberHandler(memberService MemberService, authService auth.Service) *memberHandler {
+	return &memberHandler{memberService, authService}
 }
 
 func (h *memberHandler) RegisterMember(c *gin.Context) {
@@ -24,9 +26,15 @@ func (h *memberHandler) RegisterMember(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	newUser, err := h.memberService.RegisterMember(input)
+	newMember, err := h.memberService.RegisterMember(input)
 	if err != nil {
 		res := helper.APIResponse("Register user failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	token, err := h.authService.GenerateToken(newMember.ID)
+	if err != nil {
+		res := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
@@ -35,7 +43,8 @@ func (h *memberHandler) RegisterMember(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	response := helper.APIResponse("Your user has been registered", http.StatusOK, "success", newUser)
+	memberDTO := FormatMemberDTO(newMember, token)
+	response := helper.APIResponse("Register member success!", http.StatusOK, "success", memberDTO)
 
 	c.JSON(http.StatusOK, response)
 }
@@ -56,6 +65,13 @@ func (h *memberHandler) Login(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	response := helper.APIResponse("Successfully loggedin", http.StatusOK, "success", loginMember)
+	token, err := h.authService.GenerateToken(loginMember.ID)
+	if err != nil {
+		res := helper.APIResponse("Login member failed", http.StatusBadRequest, "error", nil)
+		c.JSON(http.StatusBadRequest, res)
+		return
+	}
+	memberDTO := FormatMemberDTO(loginMember, token)
+	response := helper.APIResponse("Login member success!", http.StatusOK, "success", memberDTO)
 	c.JSON(http.StatusOK, response)
 }
