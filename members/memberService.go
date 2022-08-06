@@ -1,9 +1,14 @@
 package members
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"errors"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type MemberService interface {
 	RegisterMember(MemberRegisterInput) (Member, error)
+	Login(LoginInput) (Member, error)
 }
 
 type serviceMember struct {
@@ -28,4 +33,23 @@ func (s *serviceMember) RegisterMember(input MemberRegisterInput) (Member, error
 		return newMember, err
 	}
 	return newMember, nil
+}
+
+func (s *serviceMember) Login(input LoginInput) (Member, error) {
+	email := input.Email
+	password := input.Password
+
+	member, err := s.memberRepositoryDB.FindByEmail(email)
+	if err != nil {
+		return member, err
+	}
+	if member.Email == "" {
+		return member, errors.New("no member on that email found")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(member.Password), []byte(password))
+	if err != nil {
+		return member, err
+	}
+	return member, nil
 }

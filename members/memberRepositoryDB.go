@@ -9,6 +9,7 @@ import (
 
 type MemberRepositoryDB interface {
 	RegisterMember(Member) (Member, error)
+	FindByEmail(string) (Member, error)
 }
 
 type memberRepositoryDB struct {
@@ -25,6 +26,16 @@ func (s *memberRepositoryDB) RegisterMember(member Member) (Member, error) {
 	if err = s.db.Create(&member).Error; err != nil {
 		logger.Error("Unexpected Error: " + err.Error())
 		return member, nil
+	}
+	return member, nil
+}
+
+func (s *memberRepositoryDB) FindByEmail(email string) (Member, error) {
+	var member Member
+	var err error
+	if err = s.db.Where("email = ?", email).Find(&member).Error; err != nil {
+		logger.Error("Unexpected Error: " + err.Error())
+		return member, err
 	}
 	return member, nil
 }

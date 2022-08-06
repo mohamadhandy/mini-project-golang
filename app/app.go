@@ -28,7 +28,7 @@ func Start() {
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 	serverPort := os.Getenv("SERVER_PORT")
-	// dbURL := "postgres://postgres:admin@localhost:5432/mini_project"
+
 	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", dbUser, dbPasswd, dbAddr, dbPort, dbName)
 	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 
@@ -57,6 +57,7 @@ func Start() {
 	api.PUT("/foods/:foodid", foodHandler.UpdateFood)
 	api.POST("/foods", foodHandler.CreateFood)
 	api.POST("/members", memberHandler.RegisterMember)
+	api.POST("/sessions", memberHandler.Login)
 
 	routerRun := fmt.Sprintf(":%s", serverPort)
 	router.Run(routerRun)

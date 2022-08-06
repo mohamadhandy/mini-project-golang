@@ -39,3 +39,23 @@ func (h *memberHandler) RegisterMember(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *memberHandler) Login(c *gin.Context) {
+	var input LoginInput
+	err := c.ShouldBindJSON(&input)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Login member failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	loginMember, err := h.memberService.Login(input)
+	if err != nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		response := helper.APIResponse("Login member failed", http.StatusUnprocessableEntity, "error", errorMessage)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+	response := helper.APIResponse("Successfully loggedin", http.StatusOK, "success", loginMember)
+	c.JSON(http.StatusOK, response)
+}
