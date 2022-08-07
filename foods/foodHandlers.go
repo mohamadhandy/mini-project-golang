@@ -18,7 +18,9 @@ func NewFoodHandler(foodService FoodService) *foodHandler {
 }
 
 func (h *foodHandler) GetAllFood(c *gin.Context) {
-	foods, err := h.foodService.GetAllFood()
+	// var pagination dtos.Pagination
+	pagination := helper.GeneratePaginationRequest(c)
+	foods, err := h.foodService.GetAllFood(*pagination)
 	if err != nil {
 		res := helper.APIResponse("Get all food error!", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)

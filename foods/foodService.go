@@ -2,10 +2,11 @@ package foods
 
 import (
 	"errors"
+	"miniprojectgo/dtos"
 )
 
 type FoodService interface {
-	GetAllFood() ([]Food, error)
+	GetAllFood(dtos.Pagination) (dtos.Pagination, error)
 	GetFoodByID(int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
 	DeleteFood(int) (Food, error)
@@ -20,8 +21,8 @@ func NewServiceFood(foodRepository RepositoryFoodDB) *serviceFood {
 	return &serviceFood{foodRepository: foodRepository}
 }
 
-func (s *serviceFood) GetAllFood() ([]Food, error) {
-	foods, err := s.foodRepository.FindAll()
+func (s *serviceFood) GetAllFood(pag dtos.Pagination) (dtos.Pagination, error) {
+	foods, err := s.foodRepository.FindAll(pag)
 	if err != nil {
 		return foods, err
 	} else {
