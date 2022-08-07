@@ -44,9 +44,9 @@ func (h *memberHandler) RegisterMember(c *gin.Context) {
 		return
 	}
 	memberDTO := FormatMemberDTO(newMember, token)
-	response := helper.APIResponse("Register member success!", http.StatusOK, "success", memberDTO)
+	response := helper.APIResponse("Register member success!", http.StatusCreated, "success", memberDTO)
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusCreated, response)
 }
 
 func (h *memberHandler) Login(c *gin.Context) {

@@ -81,9 +81,9 @@ func (h *foodHandler) CreateFood(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	response := helper.APIResponse("Your Food has been created", http.StatusOK, "success", newFood)
+	response := helper.APIResponse("Your Food has been created", http.StatusCreated, "success", newFood)
 
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusCreated, response)
 }
 
 func (h *foodHandler) UpdateFood(c *gin.Context) {
