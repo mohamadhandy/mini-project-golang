@@ -3,6 +3,7 @@ package foods
 import (
 	"fmt"
 	"miniprojectgo/helper"
+	"miniprojectgo/members"
 	"net/http"
 	"strconv"
 
@@ -17,8 +18,16 @@ func NewFoodHandler(foodService FoodService) *foodHandler {
 	return &foodHandler{foodService}
 }
 
+func getCurrentMemberJWT(c *gin.Context) int {
+	currMember := c.MustGet("currentUser").(members.Member)
+	memberId := currMember.ID
+	return memberId
+}
+
 func (h *foodHandler) GetAllFood(c *gin.Context) {
-	foods, err := h.foodService.GetAllFood()
+	memberId := getCurrentMemberJWT(c)
+	fmt.Println("memberId", memberId)
+	foods, err := h.foodService.GetAllFood(memberId)
 	if err != nil {
 		res := helper.APIResponse("Get all food error!", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)

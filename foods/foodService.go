@@ -2,10 +2,13 @@ package foods
 
 import (
 	"errors"
+	"fmt"
+	"miniprojectgo/members"
+	setupdb "miniprojectgo/setupDB"
 )
 
 type FoodService interface {
-	GetAllFood() ([]Food, error)
+	GetAllFood(int) ([]Food, error)
 	GetFoodByID(int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
 	DeleteFood(int) (Food, error)
@@ -20,12 +23,24 @@ func NewServiceFood(foodRepository RepositoryFoodDB) *serviceFood {
 	return &serviceFood{foodRepository: foodRepository}
 }
 
-func (s *serviceFood) GetAllFood() ([]Food, error) {
-	foods, err := s.foodRepository.FindAll()
+func (s *serviceFood) GetAllFood(idMember int) ([]Food, error) {
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return foods, err
+		return nil, err
+	}
+	if member.Email != "" {
+		var f []Food
+		return f, nil
 	} else {
-		return foods, nil
+		fmt.Println("Member test", member)
+		foods, err := s.foodRepository.FindAll()
+		if err != nil {
+			return foods, err
+		} else {
+			return foods, nil
+		}
 	}
 }
 
