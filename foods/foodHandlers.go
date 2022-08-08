@@ -45,7 +45,8 @@ func (h *foodHandler) GetAllFood(c *gin.Context) {
 func (h *foodHandler) GetSingleFood(c *gin.Context) {
 	foodid := c.Param("foodid")
 	foodId, _ := strconv.Atoi(foodid)
-	foods, err := h.foodService.GetFoodByID(foodId)
+	memberId := getCurrentMemberJWT(c)
+	foods, err := h.foodService.GetFoodByID(foodId, memberId)
 	if err != nil {
 		errMessage := fmt.Sprintf("Get single food with id %v error!", foodid)
 		res := helper.APIResponse(errMessage, http.StatusBadRequest, "error", nil)
@@ -62,7 +63,8 @@ func (h *foodHandler) GetSingleFood(c *gin.Context) {
 func (h *foodHandler) DeleteFood(c *gin.Context) {
 	foodid := c.Param("foodid")
 	foodId, _ := strconv.Atoi(foodid)
-	_, err := h.foodService.DeleteFood(foodId)
+	memberId := getCurrentMemberJWT(c)
+	_, err := h.foodService.DeleteFood(foodId, memberId)
 	if err != nil {
 		errMessage := fmt.Sprintf("Delete food with id %v error!", foodid)
 		res := helper.APIResponse(errMessage, http.StatusBadRequest, "error", nil)

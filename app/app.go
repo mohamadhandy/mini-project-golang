@@ -60,8 +60,8 @@ func Start() {
 
 	api := router.Group("/api/v1")
 	api.GET("/foods", authMiddleware(authService, memberService), foodHandler.GetAllFood)
-	api.GET("/foods/:foodid", foodHandler.GetSingleFood)
-	api.DELETE("/foods/:foodid", foodHandler.DeleteFood)
+	api.GET("/foods/:foodid", authMiddleware(authService, memberService), foodHandler.GetSingleFood)
+	api.DELETE("/foods/:foodid", authMiddleware(authService, memberService), foodHandler.DeleteFood)
 	api.PUT("/foods/:foodid", foodHandler.UpdateFood)
 	api.POST("/foods", foodHandler.CreateFood)
 	api.POST("/members", memberHandler.RegisterMember)

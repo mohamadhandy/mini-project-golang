@@ -9,9 +9,9 @@ import (
 
 type FoodService interface {
 	GetAllFood(dtos.Pagination, int) (dtos.Pagination, error)
-	GetFoodByID(int) (Food, error)
+	GetFoodByID(int, int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
-	DeleteFood(int) (Food, error)
+	DeleteFood(int, int) (Food, error)
 	UpdateFood(CreateFoodInput, int) (Food, error)
 }
 
@@ -43,15 +43,26 @@ func (s *serviceFood) GetAllFood(pag dtos.Pagination, idMember int) (dtos.Pagina
 	}
 }
 
-func (s *serviceFood) GetFoodByID(id int) (Food, error) {
-	food, err := s.foodRepository.FindById(id)
+func (s *serviceFood) GetFoodByID(id int, idMember int) (Food, error) {
+	var f Food
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return food, err
+		return f, err
 	}
-	if food.ID == 0 {
-		return food, errors.New("no food found")
+	if member.Email == "" {
+		return f, errors.New("member not found")
+	} else {
+		food, err := s.foodRepository.FindById(id)
+		if err != nil {
+			return food, err
+		}
+		if food.ID == 0 {
+			return food, errors.New("no food found")
+		}
+		return food, nil
 	}
-	return food, nil
 }
 
 func (s *serviceFood) CreateFood(input CreateFoodInput) (Food, error) {
@@ -67,12 +78,23 @@ func (s *serviceFood) CreateFood(input CreateFoodInput) (Food, error) {
 	return newFood, nil
 }
 
-func (s *serviceFood) DeleteFood(id int) (Food, error) {
-	food, err := s.foodRepository.DeleteFood(id)
+func (s *serviceFood) DeleteFood(id int, idMember int) (Food, error) {
+	var f Food
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return food, err
+		return f, err
 	}
-	return food, nil
+	if member.Email == "" {
+		return f, errors.New("member not found")
+	} else {
+		food, err := s.foodRepository.DeleteFood(id)
+		if err != nil {
+			return food, err
+		}
+		return food, nil
+	}
 }
 
 func (s *serviceFood) UpdateFood(input CreateFoodInput, id int) (Food, error) {
