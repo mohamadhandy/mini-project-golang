@@ -56,7 +56,7 @@ func Test_MemberRepositoryDB_FindByID_ShouldReturnError(t *testing.T) {
 			mock.ExpectQuery(`select \* from members`).WillReturnError(errors.New(""))
 			_, got1 := repo.FindById(0)
 			if !reflect.DeepEqual(got1, tt.wantErr) {
-				t.Errorf("FoodRepositoryDB.FindAll() got1 = %v, want %v", got1, tt.wantErr)
+				t.Errorf("MemberRepositoryDB.FindAll() got1 = %v, want %v", got1, tt.wantErr)
 			}
 		})
 	}
