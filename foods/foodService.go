@@ -10,7 +10,7 @@ import (
 type FoodService interface {
 	GetAllFood(dtos.Pagination, int) (dtos.Pagination, error)
 	GetFoodByID(int, int) (Food, error)
-	CreateFood(CreateFoodInput) (Food, error)
+	CreateFood(CreateFoodInput, int) (Food, error)
 	DeleteFood(int, int) (Food, error)
 	UpdateFood(CreateFoodInput, int) (Food, error)
 }
@@ -65,17 +65,28 @@ func (s *serviceFood) GetFoodByID(id int, idMember int) (Food, error) {
 	}
 }
 
-func (s *serviceFood) CreateFood(input CreateFoodInput) (Food, error) {
-	food := Food{}
-	food.Name = input.Name
-	food.Price = input.Price
-	food.Status = input.Status
-	food.Stock = input.Stock
-	newFood, err := s.foodRepository.CreateFood(food)
+func (s *serviceFood) CreateFood(input CreateFoodInput, idMember int) (Food, error) {
+	var f Food
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return newFood, err
+		return f, err
 	}
-	return newFood, nil
+	if member.Email == "" {
+		return f, errors.New("member not found")
+	} else {
+		food := Food{}
+		food.Name = input.Name
+		food.Price = input.Price
+		food.Status = input.Status
+		food.Stock = input.Stock
+		newFood, err := s.foodRepository.CreateFood(food)
+		if err != nil {
+			return newFood, err
+		}
+		return newFood, nil
+	}
 }
 
 func (s *serviceFood) DeleteFood(id int, idMember int) (Food, error) {

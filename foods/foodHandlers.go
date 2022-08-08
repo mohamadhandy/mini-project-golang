@@ -21,6 +21,7 @@ func NewFoodHandler(foodService FoodService) *foodHandler {
 
 func getCurrentMemberJWT(c *gin.Context) int {
 	currMember := c.MustGet("currentMember").(members.Member)
+	fmt.Println("currMember", currMember)
 	memberId := currMember.ID
 	return memberId
 }
@@ -87,7 +88,8 @@ func (h *foodHandler) CreateFood(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, response)
 		return
 	}
-	newFood, err := h.foodService.CreateFood(input)
+	memberId := getCurrentMemberJWT(c)
+	newFood, err := h.foodService.CreateFood(input, memberId)
 	if err != nil {
 		res := helper.APIResponse("Create food failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)

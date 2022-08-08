@@ -62,8 +62,8 @@ func Start() {
 	api.GET("/foods", authMiddleware(authService, memberService), foodHandler.GetAllFood)
 	api.GET("/foods/:foodid", authMiddleware(authService, memberService), foodHandler.GetSingleFood)
 	api.DELETE("/foods/:foodid", authMiddleware(authService, memberService), foodHandler.DeleteFood)
-	api.PUT("/foods/:foodid", foodHandler.UpdateFood)
-	api.POST("/foods", foodHandler.CreateFood)
+	api.PUT("/foods/:foodid", authMiddleware(authService, memberService), foodHandler.UpdateFood)
+	api.POST("/foods", authMiddleware(authService, memberService), foodHandler.CreateFood)
 	api.POST("/members", memberHandler.RegisterMember)
 	api.POST("/sessions", memberHandler.Login)
 
