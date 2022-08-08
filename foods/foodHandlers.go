@@ -3,6 +3,8 @@ package foods
 import (
 	"fmt"
 	"miniprojectgo/helper"
+	"miniprojectgo/logger"
+	"miniprojectgo/members"
 	"net/http"
 	"strconv"
 
@@ -17,11 +19,19 @@ func NewFoodHandler(foodService FoodService) *foodHandler {
 	return &foodHandler{foodService}
 }
 
+func getCurrentMemberJWT(c *gin.Context) int {
+	currMember := c.MustGet("currentMember").(members.Member)
+	memberId := currMember.ID
+	return memberId
+}
+
 func (h *foodHandler) GetAllFood(c *gin.Context) {
 	// var pagination dtos.Pagination
+	memberId := getCurrentMemberJWT(c)
 	pagination := helper.GeneratePaginationRequest(c)
-	foods, err := h.foodService.GetAllFood(*pagination)
+	foods, err := h.foodService.GetAllFood(*pagination, memberId)
 	if err != nil {
+		logger.Info(err.Error())
 		res := helper.APIResponse("Get all food error!", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
 		return
@@ -77,7 +87,7 @@ func (h *foodHandler) CreateFood(c *gin.Context) {
 	}
 	newFood, err := h.foodService.CreateFood(input)
 	if err != nil {
-		res := helper.APIResponse("Register account failed", http.StatusBadRequest, "error", nil)
+		res := helper.APIResponse("Create food failed", http.StatusBadRequest, "error", nil)
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}

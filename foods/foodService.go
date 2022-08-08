@@ -3,10 +3,12 @@ package foods
 import (
 	"errors"
 	"miniprojectgo/dtos"
+	"miniprojectgo/members"
+	setupdb "miniprojectgo/setupDB"
 )
 
 type FoodService interface {
-	GetAllFood(dtos.Pagination) (dtos.Pagination, error)
+	GetAllFood(dtos.Pagination, int) (dtos.Pagination, error)
 	GetFoodByID(int) (Food, error)
 	CreateFood(CreateFoodInput) (Food, error)
 	DeleteFood(int) (Food, error)
@@ -21,12 +23,23 @@ func NewServiceFood(foodRepository RepositoryFoodDB) *serviceFood {
 	return &serviceFood{foodRepository: foodRepository}
 }
 
-func (s *serviceFood) GetAllFood(pag dtos.Pagination) (dtos.Pagination, error) {
-	foods, err := s.foodRepository.FindAll(pag)
+func (s *serviceFood) GetAllFood(pag dtos.Pagination, idMember int) (dtos.Pagination, error) {
+	// foods, err := s.foodRepository.FindAll(pag)
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return foods, err
+		return pag, err
+	}
+	if member.Email == "" {
+		return pag, errors.New("member not found")
 	} else {
-		return foods, nil
+		foods, err := s.foodRepository.FindAll(pag)
+		if err != nil {
+			return foods, err
+		} else {
+			return foods, nil
+		}
 	}
 }
 

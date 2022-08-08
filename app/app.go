@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -60,7 +59,7 @@ func Start() {
 	router := gin.Default()
 
 	api := router.Group("/api/v1")
-	api.GET("/foods", foodHandler.GetAllFood)
+	api.GET("/foods", authMiddleware(authService, memberService), foodHandler.GetAllFood)
 	api.GET("/foods/:foodid", foodHandler.GetSingleFood)
 	api.DELETE("/foods/:foodid", foodHandler.DeleteFood)
 	api.PUT("/foods/:foodid", foodHandler.UpdateFood)
@@ -86,25 +85,19 @@ func authMiddleware(authService auth.Service, memberService members.MemberServic
 		if len(arrayToken) == 2 {
 			tokenString = arrayToken[1]
 		}
-		token, err := authService.ValidateToken(tokenString)
-		if err != nil {
+		result, memberId, err := authService.ValidateToken(tokenString)
+		if err != nil && !result && memberId == 0 {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
+		} else {
+			member, err := memberService.GetMemberByID(memberId)
+			if err != nil {
+				response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+				c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+				return
+			}
+			c.Set("currentMember", member)
 		}
-		claim, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-		memberId := int(claim["member_id"].(float64))
-		member, err := memberService.GetMemberByID(memberId)
-		if err != nil {
-			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
-			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
-			return
-		}
-		c.Set("currentMember", member)
 	}
 }
