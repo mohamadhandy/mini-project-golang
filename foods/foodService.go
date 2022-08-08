@@ -12,7 +12,7 @@ type FoodService interface {
 	GetFoodByID(int, int) (Food, error)
 	CreateFood(CreateFoodInput, int) (Food, error)
 	DeleteFood(int, int) (Food, error)
-	UpdateFood(CreateFoodInput, int) (Food, error)
+	UpdateFood(CreateFoodInput, int, int) (Food, error)
 }
 
 type serviceFood struct {
@@ -108,15 +108,26 @@ func (s *serviceFood) DeleteFood(id int, idMember int) (Food, error) {
 	}
 }
 
-func (s *serviceFood) UpdateFood(input CreateFoodInput, id int) (Food, error) {
-	food := Food{}
-	food.Name = input.Name
-	food.Price = input.Price
-	food.Status = input.Status
-	food.Stock = input.Stock
-	updatedFood, err := s.foodRepository.UpdateFood(food, id)
+func (s *serviceFood) UpdateFood(input CreateFoodInput, id int, idMember int) (Food, error) {
+	var f Food
+	db, _ := setupdb.DBClient()
+	memberRepo := members.NewMemberRepository(db)
+	member, err := memberRepo.FindById(idMember)
 	if err != nil {
-		return updatedFood, err
+		return f, err
 	}
-	return updatedFood, nil
+	if member.Email == "" {
+		return f, errors.New("member not found")
+	} else {
+		food := Food{}
+		food.Name = input.Name
+		food.Price = input.Price
+		food.Status = input.Status
+		food.Stock = input.Stock
+		updatedFood, err := s.foodRepository.UpdateFood(food, id)
+		if err != nil {
+			return updatedFood, err
+		}
+		return updatedFood, nil
+	}
 }

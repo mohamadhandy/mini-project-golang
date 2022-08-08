@@ -110,7 +110,8 @@ func (h *foodHandler) UpdateFood(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-	updatedFood, err := h.foodService.UpdateFood(input, foodId)
+	memberId := getCurrentMemberJWT(c)
+	updatedFood, err := h.foodService.UpdateFood(input, foodId, memberId)
 	if err != nil {
 		errMessage := fmt.Sprintf("Update food with id %v error!", foodid)
 		res := helper.APIResponse(errMessage, http.StatusBadRequest, "error", err)
