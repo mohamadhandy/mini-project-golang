@@ -1,108 +1,62 @@
 package members
 
 import (
+	"errors"
+	"fmt"
+	"log"
+	"miniprojectgo/dtos"
 	"reflect"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-func TestNewMemberRepository(t *testing.T) {
-	type args struct {
-		db *gorm.DB
+func NewMock() (*gorm.DB, sqlmock.Sqlmock) {
+	_, mock, err := sqlmock.New()
+	// defer db.Close()
+	if err != nil {
+		log.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
-	tests := []struct {
-		name string
-		args args
-		want *memberRepositoryDB
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewMemberRepository(tt.args.db); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMemberRepository() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+
+	// sanityCheck()
+	// db := getDBClient()
+
+	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s", "postgres", "admin", "localhost", "5432", "testdml")
+	gormDB, _ := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
+
+	return gormDB, mock
 }
 
-func Test_memberRepositoryDB_RegisterMember(t *testing.T) {
+func Test_MemberRepositoryDB_FindByID_ShouldReturnError(t *testing.T) {
 	type args struct {
-		member Member
+		dtos.Pagination
 	}
 	tests := []struct {
 		name    string
-		s       *memberRepositoryDB
 		args    args
-		want    Member
-		wantErr bool
+		want    []Member
+		wantErr error
 	}{
 		// TODO: Add test cases.
+		{
+			"succcess get data all member",
+			args{},
+			nil,
+			nil,
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.RegisterMember(tt.args.member)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("memberRepositoryDB.RegisterMember() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("memberRepositoryDB.RegisterMember() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
 
-func Test_memberRepositoryDB_FindByEmail(t *testing.T) {
-	type args struct {
-		email string
-	}
-	tests := []struct {
-		name    string
-		s       *memberRepositoryDB
-		args    args
-		want    Member
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.FindByEmail(tt.args.email)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("memberRepositoryDB.FindByEmail() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("memberRepositoryDB.FindByEmail() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+			db, mock := NewMock()
+			repo := NewMemberRepository(db)
 
-func Test_memberRepositoryDB_FindById(t *testing.T) {
-	type args struct {
-		id int
-	}
-	tests := []struct {
-		name    string
-		s       *memberRepositoryDB
-		args    args
-		want    Member
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.s.FindById(tt.args.id)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("memberRepositoryDB.FindById() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("memberRepositoryDB.FindById() = %v, want %v", got, tt.want)
+			mock.ExpectQuery(`select \* from members`).WillReturnError(errors.New(""))
+			_, got1 := repo.FindById(0)
+			if !reflect.DeepEqual(got1, tt.wantErr) {
+				t.Errorf("FoodRepositoryDB.FindAll() got1 = %v, want %v", got1, tt.wantErr)
 			}
 		})
 	}
