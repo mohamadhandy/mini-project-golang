@@ -53,7 +53,7 @@ func Test_foodRepositoryDB_FindAll_ShouldReturnError(t *testing.T) {
 			db, mock := NewMock()
 			repo := NewFoodRepositoryDB(db)
 
-			mock.ExpectQuery(`select \* from customers`).WillReturnError(errors.New(""))
+			mock.ExpectQuery(`select \* from foods`).WillReturnError(errors.New(""))
 			_, got1 := repo.FindAll(dtos.Pagination{})
 			if !reflect.DeepEqual(got1, tt.wantErr) {
 				t.Errorf("FoodRepositoryDB.FindAll() got1 = %v, want %v", got1, tt.wantErr)
