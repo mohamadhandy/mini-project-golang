@@ -21,7 +21,6 @@ func NewFoodHandler(foodService FoodService) *foodHandler {
 
 func getCurrentMemberJWT(c *gin.Context) int {
 	currMember := c.MustGet("currentMember").(members.Member)
-	fmt.Println("currMember", currMember)
 	memberId := currMember.ID
 	return memberId
 }

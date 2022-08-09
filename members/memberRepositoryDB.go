@@ -1,7 +1,6 @@
 package members
 
 import (
-	"fmt"
 	"miniprojectgo/logger"
 
 	"gorm.io/gorm"
@@ -22,7 +21,6 @@ func NewMemberRepository(db *gorm.DB) *memberRepositoryDB {
 }
 
 func (s *memberRepositoryDB) RegisterMember(member Member) (Member, error) {
-	fmt.Println("member", member)
 	var err error
 	if err = s.db.Create(&member).Error; err != nil {
 		logger.Error("Unexpected Error: " + err.Error())
